@@ -105,9 +105,9 @@ class Formatter(Reg):
 
     def read(self, line):
         key = self._get_key(line)
-        if key:
-            var = [key] + self._pat[g.group(1)]
-        else:
+        try:
+            var = [key] + self._pat[key]
+        except:
             return(None)
         out = re.sub(self._ppat.format(*var),
                      self._rpat.format(*var),
