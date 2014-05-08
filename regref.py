@@ -97,7 +97,7 @@ class Reg:
     def read(self, line):
         raise NotImplemented
 
-class Formater(Reg):
+class Formatter(Reg):
     def _load_patterns(self, args):
         with open(args.pattern_file, 'r') as f:
             pat = {c[0]:c[1:] for c in (r.split() for r in f.readlines())}
