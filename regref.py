@@ -61,10 +61,16 @@ def parser(argv=None):
         action='store_true',
         default=False
     )
+    parser.add_argument(
+        '-v', '--invert',
+        help='Return only non-matching (does nothing if -m and -p)',
+        action='store_true',
+        default=False
+    )
     args = parser.parse_args(argv)
     return(args)
 
-class Searcher:
+class Reg:
     def __init__(self, args):
         self._pat = self._load_patterns(args)
         self._match = self._compile_pattern(args.matcher)
@@ -72,9 +78,7 @@ class Searcher:
         self._rpat = args.replacement
 
     def _load_patterns(self, args):
-        with open(args.pattern_file, 'r') as f:
-            pat = {c[0]:c[1:] for c in (r.split() for r in f.readlines())}
-        return(pat)
+        raise NotImplemented
 
     def _compile_pattern(self, pat):
         try:
@@ -84,27 +88,57 @@ class Searcher:
             raise SystemExit
         return(cpat)
 
-    def reformat(self, line):
-        g = re.search(self._match, line)
+    def _get_key(self, line):
         try:
-            key = g.group(1)
-            var = [key] + self._pat[g.group(1)]
+            return(re.search(self._match, line).group(1))
         except:
+            return(None)
+
+    def read(self, line):
+        raise NotImplemented
+
+class Formater(Reg):
+    def _load_patterns(self, args):
+        with open(args.pattern_file, 'r') as f:
+            pat = {c[0]:c[1:] for c in (r.split() for r in f.readlines())}
+        return(pat)
+
+    def read(self, line):
+        key = self._get_key(line)
+        if key:
+            var = [key] + self._pat[g.group(1)]
+        else:
             return(None)
         out = re.sub(self._ppat.format(*var),
                      self._rpat.format(*var),
                      line)
         return(out)
 
+class Searcher(Reg):
+    def _load_patterns(self, args):
+        with open(args.pattern_file, 'r') as f:
+            pat = {c.strip() for c in f.readlines()}
+        return(pat)
 
+    def read(self, line):
+        key = self._get_key(line)
+        return(key in self._pat)
 
 if __name__ == '__main__':
     args = parser()
-    searcher = Searcher(args)
-    for line in sys.stdin:
-        line = line.strip()
-        out = searcher.reformat(line)
-        if out:
-            print(out)
-        elif args.write_all:
-            print(line)
+    if(args.pattern and args.replacement):
+        reformatter = Formatter(args)
+        for line in sys.stdin:
+            line = line.strip()
+            out = reformatter.read(line)
+            if out:
+                print(out)
+            elif args.write_all:
+                print(line)
+    else:
+        searcher = Searcher(args)
+        for line in sys.stdin:
+            line = line.strip()
+            matched = searcher.read(line)
+            if (matched and not args.invert) or (not matched and args.invert):
+                print(line)
