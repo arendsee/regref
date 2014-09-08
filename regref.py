@@ -17,16 +17,13 @@ def parser(argv=None):
         $ cat pat.tab
          asdf 1234
          qwer 2345
-         gfhj 7890
         $ cat in.tab
          file1 ID=asdf
          file2 ID=qwer
-         file3 ID=gfhj
          file4 ID=rrrr
-        $ cat in.tab | regref -f pat.tab -m 'ID=(\S+)' -p 'ID=(\S+)' -r 'ID={1}'
+        $ regref -f pat.tab -m 'ID=(\S+)' -p 'ID=(\S+)' -r 'ID={1}' < in.tab
          file1 ID=1234
          file2 ID=2345
-         file3 ID=7890
         '''
     )
     parser.add_argument(
@@ -84,8 +81,7 @@ class Reg:
         try:
             cpat = re.compile(pat)
         except:
-            print('Invalid patter "%s"' % pat, file=sys.stderr)
-            raise SystemExit
+            sys.exit('Invalid patter "%s"' % pat)
         return(cpat)
 
     def _get_key(self, line):
