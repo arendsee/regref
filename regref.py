@@ -49,7 +49,12 @@ def parser(argv=None):
             sys.exit("--where must have at least two arguments (e.g. --where 'id=(\d+)' 3)")
         else:
             Anchor = collections.namedtuple('Anchor', ['capture', 'column'])
-            args.where = Anchor(args.where[0], int(args.where[1]))
+            try:
+                args.where = Anchor(args.where[0], int(args.where[1]) - 1)
+                if args.where.column < 0:
+                    raise ValueError
+            except ValueError:
+                sys.exit('Second argument to --where must be an integer >= 1')
 
     return(args)
 
@@ -141,7 +146,7 @@ class Regref:
         try:
             rout = re.sub('\$\{(\d+)\}', lambda m: row[int(m.groups(1)[0])], r)
         except IndexError:
-            sys.exit('MAP lacks column requested column (index starts at 0)')
+            sys.exit('MAP lacks column requested column')
         except re.error:
             sys.exit("Invalid regular expression: '{}'".format(r))
         return(rout)
