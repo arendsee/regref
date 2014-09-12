@@ -7,8 +7,15 @@ import collections
 import io
 import os
 
-if not os.path.exists('test-data'):
-    os.mkdir('test-data')
+def make_file(data, name):
+    if not os.path.exists('test-data'):
+        os.mkdir('test-data')
+    datfile = os.path.join(os.getcwd(), 'test-data', name)
+    with open(datfile, 'w') as f:
+        for line in data:
+            print(line, file=f)
+    return(datfile)
+
 
 class TestSelector(unittest.TestCase):
     def setUp(self):
@@ -17,7 +24,10 @@ class TestSelector(unittest.TestCase):
             '13 ab bb',
             '14 ac bc'
         ]
-        self.sel = regref.Selector(capture='id=(\d+)', column=0, mapfile=pat)
+        self.pfile = make_file(pat, name='simple-map.txt')
+        argv = [self.pfile, '--where', 'id=(\d+)', '1']
+        args = regref.parser(argv)
+        self.sel = regref.Selector(args)
 
     def test_default(self):
         self.assertEqual(self.sel.get_maprow('yeah id=13'), ['13', 'ab', 'bb'])
@@ -45,19 +55,18 @@ class TestRegref(unittest.TestCase):
             '13 ab bb',
             '14 ac bc'
         ]
+        self.smap = [
+            '12,aa,ba',
+            '13,ab,bb',
+            '14,ac,bc'
+        ]
         self.data = [
             'asaa id=12',
             'asdf id=14',
             't aa id=42',
         ]
-        self.pfile = self._make_file(self.pmap, name='simple-map.txt')
-
-    def _make_file(self, pmap, name):
-        datfile = os.path.join(os.getcwd(), 'test-data', name)
-        with open(datfile, 'w') as f:
-            for line in pmap:
-                print(line, file=f)
-        return(datfile)
+        self.pfile = make_file(self.pmap, name='simple-map.txt')
+        self.sfile = make_file(self.smap, name='simple-map.csv')
 
     def _get_results(self, argv, data):
         args = regref.parser(argv)
@@ -84,6 +93,9 @@ class TestRegref(unittest.TestCase):
         reg = self._get_results([self.pfile, ' id=${1}', '--where', 'id=(\d+)', '1'], self.data)
         self.assertEqual(reg, ['asaa', 'asdf', 't aa id=42'])
 
+    def test_delimiter(self):
+        reg = self._get_results(['-d', ',', self.sfile, 's${2}'], self.data)
+        self.assertEqual(reg, ['a id=12', 'asdf id=14', 't aa id=42'])
 
 if __name__ == '__main__':
     unittest.main(warnings='ignore')
