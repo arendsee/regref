@@ -42,6 +42,11 @@ def parser(argv=None):
         metavar='COND',
         help='ARG1: a regex with one capture. ARG2: column number for capture'
     )
+    parser.add_argument(
+        '-d', '--delimiter',
+        default=None,
+        help='column delimiter for MAP (defaults to whitespace)'
+    )
     args = parser.parse_args(argv)
 
     if args.where:
@@ -60,15 +65,16 @@ def parser(argv=None):
 
 
 class Selector:
-    def __init__(self, capture, column, mapfile):
-        self.capture = re.compile(capture)
-        self.column = column
-        self.repmap = self._load_map(mapfile)
+    def __init__(self, args):
+        self.capture = re.compile(args.where.capture)
+        self.column = args.where.column
+        self.repmap = self._load_map(args.map)
+        self.delimiter = args.delimiter
 
     def _load_map(self, mapfile):
         repmap = dict()
         for line in mapfile:
-            row = line.split()
+            row = line.split(self.delimiter)
             try:
                 if row[self.column] in repmap:
                     msg = 'Column {} of MAP is not a unique key'
@@ -101,9 +107,9 @@ class Regref:
         self.data = data
 
         if opt in (4, 6, 7):
-            self.selector = Selector(args.where.capture, args.where.column, args.map)
+            self.selector = Selector(args)
         else:
-            self.patmap = [s.split() for s in args.map]
+            self.patmap = [s.split(args.delimiter) for s in args.map]
 
         # delete O(mn)
         if opt == 2:
