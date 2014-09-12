@@ -68,8 +68,8 @@ class Selector:
     def __init__(self, args):
         self.capture = re.compile(args.where.capture)
         self.column = args.where.column
-        self.repmap = self._load_map(args.map)
         self.delimiter = args.delimiter
+        self.repmap = self._load_map(args.map)
 
     def _load_map(self, mapfile):
         repmap = dict()
