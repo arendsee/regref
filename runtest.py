@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
-
 import regref
 import unittest
 import sys
 import collections
 import io
 import os
+
+if not os.path.exists('test-data'):
+    os.mkdir('test-data')
 
 class TestSelector(unittest.TestCase):
     def setUp(self):
