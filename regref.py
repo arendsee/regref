@@ -72,7 +72,7 @@ class Selector:
             try:
                 if row[self.column] in repmap:
                     msg = 'Column {} of MAP is not a unique key'
-                    sys.exit(msg.format(self.column))
+                    sys.exit(msg.format(self.column + 1))
                 repmap[row[self.column]] = row
             except IndexError:
                 msg = 'MAP must have at least {} columns ({} found)'
@@ -80,12 +80,15 @@ class Selector:
         return(repmap)
 
     def get_maprow(self, line):
-        try:
-            m = re.search(self.capture, line)
-            rowid = m.group(1)
-            row = self.repmap[rowid]
-        except (KeyError, IndexError, AttributeError):
-            row = None
+        row = None
+        for m in re.finditer(self.capture, line):
+            try:
+                rowid = m.group(1)
+                if rowid in self.repmap and row:
+                    sys.exit("Ambiguity on line '{}'".format(line))
+                row = self.repmap[rowid]
+            except (KeyError, IndexError, AttributeError):
+                pass
         return(row)
 
 class Regref:
@@ -144,7 +147,7 @@ class Regref:
 
     def _specify_regex(self, r, row):
         try:
-            rout = re.sub('\$\{(\d+)\}', lambda m: row[int(m.groups(1)[0])], r)
+            rout = re.sub('\$\{(\d+)\}', lambda m: row[int(m.groups(1)[0]) - 1], r)
         except IndexError:
             sys.exit('MAP lacks column requested column')
         except re.error:
