@@ -3,6 +3,21 @@
 
 # regref
 
+## Installation
+
+``` sh
+pip3 install regref
+```
+
+You can access the CLI help messages with:
+
+``` sh
+regref -h
+```
+
+## Example
+
+
 To explain `regref` I will walk through the following example:
 
 ``` sh
