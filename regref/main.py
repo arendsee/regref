@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
-
-
 import argparse
 import re
 import sys
 import collections
+from regref.version import __version__
 
-__version__ = '2.1.0'
 __prog__ = 'regref'
 
 def parser(argv=None):
@@ -192,8 +189,6 @@ class Regref:
             yield line
 
 
-if __name__ == '__main__':
-    args = parser()
-
-    for line in Regref(args).gen():
+def main():
+    for line in Regref(parser()).gen():
         print(line, end='')

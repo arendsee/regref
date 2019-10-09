@@ -1,3 +1,6 @@
+[![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges)
+[![Build Status](https://travis-ci.org/arendsee/regref.svg?branch=master)](https://travis-ci.org/arendsee/regref)
+
 # regref
 
 To explain `regref` I will walk through the following example:
