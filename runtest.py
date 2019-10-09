@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import regref
+import regref.main as regref
 import unittest
 import sys
 import collections
