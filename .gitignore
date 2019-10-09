@@ -1,2 +1,5 @@
 test-data/*
 __pycache__
+dist
+regref.egg-info
+build
